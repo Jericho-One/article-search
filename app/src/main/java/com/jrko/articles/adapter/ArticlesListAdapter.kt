@@ -1,0 +1,148 @@
+package com.jrko.articles.adapter
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.animation.AnimationUtils
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
+import com.jrko.articles.R
+import com.jrko.articles.model.ArticleResponse
+import com.jrko.articles.model.Doc
+import com.jrko.articles.viewmodel.ArticlesListViewModel
+
+class ArticlesListAdapter(private val viewModel: ArticlesListViewModel,
+                          private val recyclerViewListener: RecyclerViewListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    var data: ArticleResponse? = null
+
+    private var lastDisplayedPosition = -1
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == VIEW_TYPE_NORMAL) {
+            ArticleViewHolder(LayoutInflater.from(parent.context)
+                .inflate(R.layout.list_item, parent, false), recyclerViewListener)
+        } else {
+            LoadingViewHolder(
+                LayoutInflater.from(parent.context).inflate(
+                    R.layout.paginated_list_loading_footer,
+                    parent,
+                    false
+                )
+            )
+        }
+    }
+
+    override fun getItemCount(): Int {
+        var count = 0
+        data?.response?.let {response ->
+            count = response.docs.size
+            if (response.meta.hits > count) {
+                count++
+            }
+        }
+        return count
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        val currentDataSetSize:  Int? = data?.response?.docs?.size
+        currentDataSetSize?.apply {
+            if (position == this) {
+                return VIEW_TYPE_MORE
+            }
+        }
+        return VIEW_TYPE_NORMAL
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is ArticleViewHolder) {
+            data?.apply {
+                val doc = this.response.docs[position]
+                holder.titleView.text = getHeadlineText(doc)
+                //TODO figure out if/where the image is (doesn't seem to come from the results of search)
+                holder.thumbnail.setImageResource(R.drawable.ic_camera_alt_gray_24dp)
+            }
+            setAnimation(holder.parentView, holder.adapterPosition)
+        } else {
+            viewModel.requestList()
+            (holder as LoadingViewHolder).progressBar.visibility = View.VISIBLE
+        }
+    }
+
+    /**
+     *
+     * Gets the headline text for the view. If actual headline print value or value is null
+     * take the abstract (this might be making an assumption, TODO investigate assumption)
+     *
+     * **/
+    private fun getHeadlineText(doc: Doc): CharSequence? {
+        var text: String? = null
+        doc.headline.apply {
+            if (this.print_headline != null) {
+                text = this.print_headline
+            } else if (this.main != null) {
+                text = this.main
+            }
+        }
+        if (text == null) {
+            text = doc.abstract
+        }
+        return text
+    }
+
+    /**
+     * Apply an animation to slide in from the left
+     */
+    private fun setAnimation(viewToAnimate: View, position: Int) {
+        // If the bound view wasn't previously displayed on screen, it's animated
+        if (position > lastDisplayedPosition) {
+            val animation = AnimationUtils.loadAnimation(viewToAnimate.context, R.anim.slide_in_from_left)
+            viewToAnimate.startAnimation(animation)
+            lastDisplayedPosition = position
+        }
+    }
+
+    fun setList(listData: ArticleResponse?) {
+        data = listData
+        if (data == null) {
+            lastDisplayedPosition = -1
+        }
+        notifyDataSetChanged()
+    }
+
+    inner class ArticleViewHolder(itemView: View, private val listener: RecyclerViewListener) :
+        RecyclerView.ViewHolder(itemView), View.OnClickListener {
+        var parentView = itemView
+        var titleView: TextView = itemView.findViewById(R.id.title_text)
+        var thumbnail: ImageView = itemView.findViewById(R.id.thumbnail)
+
+        init {
+            parentView.setOnClickListener(this)
+        }
+
+        override fun onClick(view: View?) {
+            this.listener.onClick(view, adapterPosition)
+        }
+    }
+
+    inner class LoadingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        var progressBar: ProgressBar = itemView.findViewById(R.id.progressBar)
+    }
+
+    companion object {
+        private const val VIEW_TYPE_NORMAL = 0
+        private const val VIEW_TYPE_MORE = 1
+        //TODO should probably implement paging library to handle pagination
+        val ArticlesDiffCallback = object : DiffUtil.ItemCallback<ArticleResponse>() {
+            override fun areItemsTheSame(oldItem: ArticleResponse, newItem: ArticleResponse): Boolean {
+                return oldItem.response === newItem.response
+            }
+
+            override fun areContentsTheSame(oldItem: ArticleResponse, newItem: ArticleResponse): Boolean {
+                return oldItem == newItem
+            }
+        }
+    }
+}
