@@ -20,7 +20,7 @@ data class Doc(
     val headline: Headline,
     val keywords: List<Keyword>,
     val lead_paragraph: String,
-    val multimedia: List<Multimedia>,
+    val multimedia: List<Multimedia>?,
     val news_desk: String,
     val print_page: String,
     val pub_date: String,

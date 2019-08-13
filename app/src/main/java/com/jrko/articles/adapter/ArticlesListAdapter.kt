@@ -12,17 +12,21 @@ import com.jrko.articles.R
 import com.jrko.articles.model.ArticleResponse
 import com.jrko.articles.model.Doc
 import com.jrko.articles.viewmodel.ArticlesListViewModel
+import com.squareup.picasso.Picasso
 
 class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for quick events*/private val viewModel: ArticlesListViewModel,
-                          private val recyclerViewListener: RecyclerViewListener) :
+                                                                                             private val recyclerViewListener: RecyclerViewListener
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var data: ArticleResponse? = null
 
     private var lastDisplayedPosition = -1
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == VIEW_TYPE_NORMAL) {
-            ArticleViewHolder(LayoutInflater.from(parent.context)
-                .inflate(R.layout.list_item, parent, false), recyclerViewListener)
+            ArticleViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.list_item, parent, false), recyclerViewListener
+            )
         } else {
             LoadingViewHolder(
                 LayoutInflater.from(parent.context).inflate(
@@ -36,7 +40,7 @@ class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for q
 
     override fun getItemCount(): Int {
         var count = 0
-        data?.response?.let {response ->
+        data?.response?.let { response ->
             count = response.docs.size
             if (response.meta.hits > count) {
                 count++
@@ -46,7 +50,7 @@ class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for q
     }
 
     override fun getItemViewType(position: Int): Int {
-        val currentDataSetSize:  Int? = data?.response?.docs?.size
+        val currentDataSetSize: Int? = data?.response?.docs?.size
         currentDataSetSize?.apply {
             if (position == this) {
                 return VIEW_TYPE_MORE
@@ -60,8 +64,20 @@ class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for q
             data?.apply {
                 val doc = this.response.docs[position]
                 holder.titleView.text = getHeadlineText(doc)
-                //TODO figure out if/where the image is (doesn't seem to come from the results of search)
-                holder.thumbnail.setImageResource(R.drawable.ic_camera_alt_gray_24dp)
+                //TODO figure out how to append the base URL and api key to actually
+                // get a successful image
+                doc.multimedia?.apply {
+                    if (this.isNotEmpty()) {
+                        //TODO don't have to rely on a the first element
+                        this[0].url.apply {
+                            Picasso.with(holder.parentView.context)
+                                .load(this)
+                                .placeholder(R.drawable.ic_camera_alt_gray_24dp)
+                                .fit()
+                                .into(holder.thumbnail)
+                        }
+                    }
+                }
             }
             setAnimation(holder.parentView, holder.adapterPosition)
         } else {
