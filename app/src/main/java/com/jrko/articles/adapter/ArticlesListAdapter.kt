@@ -64,14 +64,13 @@ class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for q
             data?.apply {
                 val doc = this.response.docs[position]
                 holder.titleView.text = getHeadlineText(doc)
-                //TODO figure out how to append the base URL and api key to actually
-                // get a successful image
                 doc.multimedia?.apply {
                     if (this.isNotEmpty()) {
                         //TODO don't have to rely on a the first element
                         this[0].url.apply {
+                            //TODO error handling??? Is Picasso magic?
                             Picasso.with(holder.parentView.context)
-                                .load(this)
+                                .load("https://static01.nyt.com/$this")
                                 .placeholder(R.drawable.ic_camera_alt_gray_24dp)
                                 .fit()
                                 .into(holder.thumbnail)
