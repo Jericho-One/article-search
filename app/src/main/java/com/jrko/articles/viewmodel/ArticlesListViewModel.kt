@@ -10,10 +10,10 @@ import com.jrko.articles.net.ResourceStatus
 import com.jrko.articles.repository.ArticlesRepository
 import kotlinx.coroutines.*
 import retrofit2.HttpException
+import retrofit2.Response
 
-class ArticlesListViewModel /*@Inject constructor(private val repository: ArticlesRepository)*/ : ViewModel() {
-    //TODO use dagger for DI
-    private val repository: ArticlesRepository = ArticlesRepository()
+//TODO use dagger for DI?? If it was a larger project...
+class ArticlesListViewModel(private val repository: ArticlesRepository) : ViewModel() {
     private val articlesLiveData = MutableLiveData<Resource<ArticleResponse>>()
     private var articlesResponse: ArticleResponse? = null
     private var currentSearchQuery: String? = null
@@ -37,15 +37,7 @@ class ArticlesListViewModel /*@Inject constructor(private val repository: Articl
             withContext(Dispatchers.Main) {
                 try {
                     if (response?.isSuccessful == true) {
-                        if (articlesResponse == null) {
-                            articlesResponse = response.body()
-                        } else {
-                            articlesResponse?.let {
-                                articlesResponse = appendToList(it, response.body())
-                            }
-                        }
-                        pageCount++
-                        articlesLiveData.value = Resource(ResourceStatus.SUCCESS, articlesResponse, null)
+                        handleSuccessCase(response)
                     } else {
                         articlesLiveData.value = Resource(ResourceStatus.ERROR, articlesResponse, response?.message())
                     }
@@ -56,6 +48,18 @@ class ArticlesListViewModel /*@Inject constructor(private val repository: Articl
                 }
             }
         }
+    }
+
+    private fun handleSuccessCase(response: Response<ArticleResponse>) {
+        if (articlesResponse == null) {
+            articlesResponse = response.body()
+        } else {
+            articlesResponse?.let {
+                articlesResponse = appendToList(it, response.body())
+            }
+        }
+        pageCount++
+        articlesLiveData.value = Resource(ResourceStatus.SUCCESS, articlesResponse, null)
     }
 
     private fun appendToList(articlesResponse: ArticleResponse, body: ArticleResponse?) : ArticleResponse {
@@ -81,10 +85,6 @@ class ArticlesListViewModel /*@Inject constructor(private val repository: Articl
         articlesLiveData.value = Resource(ResourceStatus.IDLE, null, null)
     }
 
-    fun hasCurrentSearchQuery(): Boolean {
-        return currentSearchQuery?.isNotEmpty() ?: false
-    }
-
     fun refreshList() {
         articlesResponse = null
         pageCount = 0
@@ -100,6 +100,6 @@ class ArticlesListViewModel /*@Inject constructor(private val repository: Articl
     }
 
     fun resumeNetworkRequests() {
-        //TODO manage reconnection event
+        //TODO manage reconnection event?? Nothing to do at this point
     }
 }

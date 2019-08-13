@@ -5,7 +5,7 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface GetDataService {
+interface GetArticlesClient {
     @GET("articlesearch.json/")
     suspend fun getArticles(@Query(value = "q") query: String?,
                             @Query(value = "page") int: Int) : Response<ArticleResponse>

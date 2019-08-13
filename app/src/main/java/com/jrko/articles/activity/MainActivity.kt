@@ -7,30 +7,44 @@ import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.jrko.articles.R
 import com.jrko.articles.fragment.ArticleDetailFragment
 import com.jrko.articles.fragment.ArticlesListFragment
 import com.jrko.articles.model.Doc
+import com.jrko.articles.net.GetArticlesClient
 import com.jrko.articles.net.NetworkConnectionLiveData
+import com.jrko.articles.net.RetrofitInstance
+import com.jrko.articles.repository.ArticlesRepository
 import com.jrko.articles.viewmodel.ArticlesListViewModel
+import com.jrko.articles.viewmodel.ArticlesListViewModelFactory
 import kotlinx.android.synthetic.main.activity_main.*
-import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), ArticlesListFragment.Callback {
 
     private lateinit var networkConnection: NetworkConnectionLiveData
-    //TODO use dagger to provide viewmodel(s)
-    /*
-    @Inject
-    var viewModelFactory: ViewModelProvider.Factory? = null */
-    private val articlesListViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
-        .create(ArticlesListViewModel::class.java)
+
+    //TODO use dagger?? If this was a larger project, it would be a good idea, but for brevity...
+    private var articlesRepository: ArticlesRepository = ArticlesRepository(RetrofitInstance().getRetrofitInstance()?.create(GetArticlesClient::class.java))
+    private lateinit var articlesListViewModel: ArticlesListViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //articlesListViewModel = ViewModelProviders.of(this, viewModelFactory).get(ArticlesListViewModel::class.java)
+        initViewModel()
+        monitorNetworkConnections()
+        setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
+        if (savedInstanceState == null) {
+            initFragment(articlesListViewModel)
+        }
+    }
+
+    private fun initViewModel() {
+        val viewModelFactory = ArticlesListViewModelFactory(articlesRepository)
+        articlesListViewModel = ViewModelProviders.of(this, viewModelFactory).get(ArticlesListViewModel::class.java)
+    }
+
+    private fun monitorNetworkConnections() {
         networkConnection = NetworkConnectionLiveData(applicationContext)
         val networkObserver = Observer<Boolean> { connected ->
             if (!connected) {
@@ -41,11 +55,6 @@ class MainActivity : AppCompatActivity(), ArticlesListFragment.Callback {
             }
         }
         networkConnection.observe(this, networkObserver)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
-        if (savedInstanceState == null) {
-            initFragment(articlesListViewModel)
-        }
     }
 
     private fun initFragment(viewModel: ArticlesListViewModel) {
