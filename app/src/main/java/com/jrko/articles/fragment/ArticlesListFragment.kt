@@ -67,40 +67,55 @@ class ArticlesListFragment(/*use dagger for this*/viewModel: ArticlesListViewMod
             it?.apply {
                 when (this.status) {
                     ResourceStatus.IDLE -> {
-                        hideRefresh()
-                        if (data == null) {
-                            articlesListAdapter.setList(null)
-                            emptyStateViewGroup.visibility = View.VISIBLE
-                        }
+                        handleIdleState(this.data)
                     }
                     ResourceStatus.LOADING -> {
-                        if (it.data == null) {
-                            showRefresh()
-                            articlesListAdapter.setList(null)
-                        } else {
-                            hideRefresh()
-                        }
-                        emptyStateViewGroup.visibility = View.GONE
+                        handleLoadingState(this.data)
                     }
                     ResourceStatus.ERROR -> {
-                        hideRefresh()
-                        this.message?.let { message ->
-                            view?.let { currentView ->
-                                Snackbar.make(currentView, message, Snackbar.LENGTH_LONG).show()
-                            }
-                        }
+                        handleErrorState(this)
                     }
                     ResourceStatus.SUCCESS -> {
-                        hideRefresh()
-                        articlesListAdapter.setList(this.data)
-                        emptyStateViewGroup.visibility =
-                            if (articlesListAdapter.itemCount == 0) View.VISIBLE else View.GONE
-
+                        handleSuccessState(this.data)
                     }
                 }
             }
         }
         articlesListViewModel.getListResource().observe(this, listObserver)
+    }
+
+    private fun handleIdleState(data: ArticleResponse?) {
+        hideRefresh()
+        if (data == null) {
+            articlesListAdapter.setList(null)
+            emptyStateViewGroup.visibility = View.VISIBLE
+        }
+    }
+
+    private fun handleLoadingState(data: ArticleResponse?) {
+        if (data == null) {
+            showRefresh()
+            articlesListAdapter.setList(null)
+        } else {
+            hideRefresh()
+        }
+        emptyStateViewGroup.visibility = View.GONE
+    }
+
+    private fun handleErrorState(resource: Resource<ArticleResponse>) {
+        hideRefresh()
+        resource.message?.let { message ->
+            view?.let { currentView ->
+                Snackbar.make(currentView, message, Snackbar.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun handleSuccessState(data: ArticleResponse?) {
+        hideRefresh()
+        articlesListAdapter.setList(data)
+        emptyStateViewGroup.visibility =
+            if (articlesListAdapter.itemCount == 0) View.VISIBLE else View.GONE
     }
 
     private fun showRefresh() {

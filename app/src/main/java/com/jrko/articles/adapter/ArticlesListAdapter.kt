@@ -7,14 +7,13 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.jrko.articles.R
 import com.jrko.articles.model.ArticleResponse
 import com.jrko.articles.model.Doc
 import com.jrko.articles.viewmodel.ArticlesListViewModel
 
-class ArticlesListAdapter(private val viewModel: ArticlesListViewModel,
+class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for quick events*/private val viewModel: ArticlesListViewModel,
                           private val recyclerViewListener: RecyclerViewListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var data: ArticleResponse? = null
@@ -134,8 +133,8 @@ class ArticlesListAdapter(private val viewModel: ArticlesListViewModel,
     companion object {
         private const val VIEW_TYPE_NORMAL = 0
         private const val VIEW_TYPE_MORE = 1
-        //TODO should probably implement paging library to handle pagination
-        val ArticlesDiffCallback = object : DiffUtil.ItemCallback<ArticleResponse>() {
+        //TODO should probably implement paging library to handle pagination but didn't now for time
+        /*val ArticlesDiffCallback = object : DiffUtil.ItemCallback<ArticleResponse>() {
             override fun areItemsTheSame(oldItem: ArticleResponse, newItem: ArticleResponse): Boolean {
                 return oldItem.response === newItem.response
             }
@@ -143,6 +142,6 @@ class ArticlesListAdapter(private val viewModel: ArticlesListViewModel,
             override fun areContentsTheSame(oldItem: ArticleResponse, newItem: ArticleResponse): Boolean {
                 return oldItem == newItem
             }
-        }
+        }*/
     }
 }
