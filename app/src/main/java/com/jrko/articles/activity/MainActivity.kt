@@ -3,9 +3,9 @@ package com.jrko.articles.activity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.jrko.articles.R
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity(), ArticlesListFragment.Callback {
 
                 override fun onQueryTextSubmit(text: String?): Boolean {
                     articlesListViewModel.getArticles(text)
-                    return true
+                    return false
                 }
             })
         }
@@ -102,13 +102,8 @@ class MainActivity : AppCompatActivity(), ArticlesListFragment.Callback {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.refresh -> {
-                //TODO call fragment to refresh
-                Toast.makeText(this, "Hay there", Toast.LENGTH_SHORT).show()
+            R.id.search -> {
                 return true
             }
             else -> super.onOptionsItemSelected(item)

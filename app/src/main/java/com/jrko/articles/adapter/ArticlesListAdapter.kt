@@ -11,12 +11,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jrko.articles.R
 import com.jrko.articles.model.ArticleResponse
 import com.jrko.articles.model.Doc
+import com.jrko.articles.model.util.ArticleUtil.getHeadlineText
 import com.jrko.articles.viewmodel.ArticlesListViewModel
 import com.squareup.picasso.Picasso
 
-class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for quick events*/private val viewModel: ArticlesListViewModel,
-                                                                                             private val recyclerViewListener: RecyclerViewListener
-) :
+class ArticlesListAdapter(/*not sure if this is a good pattern,
+                            but useful for quick events*/
+                            private val viewModel: ArticlesListViewModel,
+                            private val recyclerViewListener: RecyclerViewListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var data: ArticleResponse? = null
 
@@ -64,19 +66,7 @@ class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for q
             data?.apply {
                 val doc = this.response.docs[position]
                 holder.titleView.text = getHeadlineText(doc)
-                doc.multimedia?.apply {
-                    if (this.isNotEmpty()) {
-                        //TODO don't have to rely on a the first element
-                        this[0].url.apply {
-                            //TODO error handling??? Is Picasso magic?
-                            Picasso.with(holder.parentView.context)
-                                .load("https://static01.nyt.com/$this")
-                                .placeholder(R.drawable.ic_camera_alt_gray_24dp)
-                                .fit()
-                                .into(holder.thumbnail)
-                        }
-                    }
-                }
+                populateImageView(holder, doc)
             }
             setAnimation(holder.parentView, holder.adapterPosition)
         } else {
@@ -85,25 +75,20 @@ class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for q
         }
     }
 
-    /**
-     *
-     * Gets the headline text for the view. If actual headline print value or value is null
-     * take the abstract (this might be making an assumption, TODO investigate assumption)
-     *
-     * **/
-    private fun getHeadlineText(doc: Doc): CharSequence? {
-        var text: String? = null
-        doc.headline.apply {
-            if (this.print_headline != null) {
-                text = this.print_headline
-            } else if (this.main != null) {
-                text = this.main
+    private fun populateImageView(holder: ArticleViewHolder, doc: Doc) {
+        doc.multimedia?.apply {
+            if (this.isNotEmpty()) {
+                //TODO don't have to rely on a the first element
+                this[0].url.apply {
+                    //TODO error handling??? Is Picasso magic?
+                    Picasso.with(holder.parentView.context)
+                        .load("https://static01.nyt.com/$this")
+                        .placeholder(R.drawable.ic_camera_alt_gray_24dp)
+                        .fit()
+                        .into(holder.thumbnail)
+                }
             }
         }
-        if (text == null) {
-            text = doc.abstract
-        }
-        return text
     }
 
     /**
@@ -148,7 +133,7 @@ class ArticlesListAdapter(/*not sure if this is a good pattern, but useful for q
     companion object {
         private const val VIEW_TYPE_NORMAL = 0
         private const val VIEW_TYPE_MORE = 1
-        //TODO should probably implement paging library to handle pagination but didn't now for time
+        //TODO should probably implement paging library to handle pagination, but didn't now for time
         /*val ArticlesDiffCallback = object : DiffUtil.ItemCallback<ArticleResponse>() {
             override fun areItemsTheSame(oldItem: ArticleResponse, newItem: ArticleResponse): Boolean {
                 return oldItem.response === newItem.response

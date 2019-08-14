@@ -14,7 +14,7 @@ import androidx.lifecycle.LiveData
  * A LiveData object that Activities or Fragments or ViewModels can observe to monitor
  * network change events.
  */
-class NetworkConnectionLiveData(val context: Context) : LiveData<Boolean>() {
+class NetworkConnectionLiveData(private val context: Context) : LiveData<Boolean>() {
     private var connectivityManager: ConnectivityManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
     private lateinit var connectivityManagerCallback: ConnectivityManager.NetworkCallback
 
