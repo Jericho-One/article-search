@@ -25,28 +25,39 @@ class ArticlesListViewModel(private val repository: ArticlesRepository) : ViewMo
     }
 
     fun getArticles(searchQuery: String?) {
-        networkJob?.cancel()
         val newQuery = currentSearchQuery != searchQuery
         if (newQuery) {
             currentSearchQuery = searchQuery
             articlesResponse = null
         }
-        articlesLiveData.value = Resource(ResourceStatus.LOADING, articlesResponse, null)
-        networkJob = CoroutineScope(Dispatchers.IO).async {
-            val response = repository.getArticles(currentSearchQuery, pageCount)
-            withContext(Dispatchers.Main) {
-                try {
-                    if (response?.isSuccessful == true) {
-                        handleSuccessCase(response)
-                    } else {
-                        articlesLiveData.value = Resource(ResourceStatus.ERROR, articlesResponse, response?.message())
+        if (searchQuery != null) {
+            networkJob?.cancel()
+            articlesLiveData.value = Resource(ResourceStatus.LOADING, articlesResponse, null)
+            networkJob = CoroutineScope(Dispatchers.IO).async {
+                val response = repository.getArticles(currentSearchQuery, pageCount)
+                withContext(Dispatchers.Main) {
+                    try {
+                        if (response?.isSuccessful == true) {
+                            handleSuccessCase(response)
+                        } else {
+                            articlesLiveData.value = Resource(
+                                ResourceStatus.ERROR,
+                                articlesResponse,
+                                response?.message()
+                            )
+                        }
+                    } catch (e: HttpException) {
+                        articlesLiveData.value =
+                            Resource(ResourceStatus.ERROR, articlesResponse, e.message())
+                    } catch (e: Throwable) {
+                        articlesLiveData.value =
+                            Resource(ResourceStatus.ERROR, articlesResponse, e.message)
                     }
-                } catch (e: HttpException) {
-                    articlesLiveData.value = Resource(ResourceStatus.ERROR, articlesResponse, e.message())
-                } catch (e: Throwable) {
-                    articlesLiveData.value = Resource(ResourceStatus.ERROR, articlesResponse, e.message)
                 }
             }
+        } else {
+            // notify observer that there is nothing happening
+            articlesLiveData.value = Resource(ResourceStatus.IDLE, articlesResponse, null)
         }
     }
 
@@ -88,6 +99,7 @@ class ArticlesListViewModel(private val repository: ArticlesRepository) : ViewMo
     fun refreshList() {
         articlesResponse = null
         pageCount = 0
+        currentSearchQuery = null
         requestList()
     }
 
@@ -101,5 +113,9 @@ class ArticlesListViewModel(private val repository: ArticlesRepository) : ViewMo
 
     fun resumeNetworkRequests() {
         //TODO manage reconnection event?? Nothing to do at this point
+    }
+
+    fun getSearchQuery(): String? {
+        return currentSearchQuery
     }
 }

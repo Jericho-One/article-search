@@ -104,6 +104,12 @@ class MainActivity : AppCompatActivity(), ArticlesListFragment.Callback {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.search -> {
+                // restore current search query if exists
+                if (articlesListViewModel.getSearchQuery() != null) {
+                    val searchView = item.actionView as SearchView
+                    item.expandActionView()
+                    searchView.setQuery(articlesListViewModel.getSearchQuery(), false)
+                }
                 return true
             }
             else -> super.onOptionsItemSelected(item)

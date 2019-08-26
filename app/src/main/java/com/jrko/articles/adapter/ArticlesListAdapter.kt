@@ -27,7 +27,8 @@ class ArticlesListAdapter(/*not sure if this is a good pattern,
         return if (viewType == VIEW_TYPE_NORMAL) {
             ArticleViewHolder(
                 LayoutInflater.from(parent.context)
-                    .inflate(R.layout.list_item, parent, false), recyclerViewListener
+                    .inflate(R.layout.list_item, parent, false),
+                recyclerViewListener
             )
         } else {
             LoadingViewHolder(
