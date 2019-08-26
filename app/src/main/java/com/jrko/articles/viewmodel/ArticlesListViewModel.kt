@@ -1,10 +1,12 @@
 package com.jrko.articles.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jrko.articles.model.ArticleResponse
 import com.jrko.articles.model.Doc
+import com.jrko.articles.net.NetworkConnectionLiveData
 import com.jrko.articles.net.Resource
 import com.jrko.articles.net.ResourceStatus
 import com.jrko.articles.repository.ArticlesRepository
@@ -13,7 +15,8 @@ import retrofit2.HttpException
 import retrofit2.Response
 
 //TODO use dagger for DI?? If it was a larger project...
-class ArticlesListViewModel(private val repository: ArticlesRepository) : ViewModel() {
+class ArticlesListViewModel(private val repository: ArticlesRepository, applicationContext: Context) : ViewModel() {
+    var networkConnection: NetworkConnectionLiveData
     private val articlesLiveData = MutableLiveData<Resource<ArticleResponse>>()
     private var articlesResponse: ArticleResponse? = null
     private var currentSearchQuery: String? = null
@@ -22,6 +25,7 @@ class ArticlesListViewModel(private val repository: ArticlesRepository) : ViewMo
 
     init {
         articlesLiveData.value = Resource(ResourceStatus.IDLE, null, null)
+        networkConnection = NetworkConnectionLiveData(applicationContext)
     }
 
     fun getArticles(searchQuery: String?) {

@@ -21,9 +21,6 @@ import com.jrko.articles.viewmodel.ArticlesListViewModelFactory
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), ArticlesListFragment.Callback {
-
-    private lateinit var networkConnection: NetworkConnectionLiveData
-
     //TODO use dagger?? If this was a larger project, it would be a good idea, but for brevity...
     private var articlesRepository: ArticlesRepository = ArticlesRepository(RetrofitInstance().getRetrofitInstance()?.create(GetArticlesClient::class.java))
     private lateinit var articlesListViewModel: ArticlesListViewModel
@@ -40,12 +37,11 @@ class MainActivity : AppCompatActivity(), ArticlesListFragment.Callback {
     }
 
     private fun initViewModel() {
-        val viewModelFactory = ArticlesListViewModelFactory(articlesRepository)
+        val viewModelFactory = ArticlesListViewModelFactory(articlesRepository, applicationContext)
         articlesListViewModel = ViewModelProviders.of(this, viewModelFactory).get(ArticlesListViewModel::class.java)
     }
 
     private fun monitorNetworkConnections() {
-        networkConnection = NetworkConnectionLiveData(applicationContext)
         val networkObserver = Observer<Boolean> { connected ->
             if (!connected) {
                 articlesListViewModel.cancelAllRequests()
@@ -54,7 +50,7 @@ class MainActivity : AppCompatActivity(), ArticlesListFragment.Callback {
                 articlesListViewModel.resumeNetworkRequests()
             }
         }
-        networkConnection.observe(this, networkObserver)
+        articlesListViewModel.networkConnection.observe(this, networkObserver)
     }
 
     private fun initFragment(viewModel: ArticlesListViewModel) {
