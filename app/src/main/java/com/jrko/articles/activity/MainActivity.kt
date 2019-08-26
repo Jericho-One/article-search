@@ -13,7 +13,6 @@ import com.jrko.articles.fragment.ArticleDetailFragment
 import com.jrko.articles.fragment.ArticlesListFragment
 import com.jrko.articles.model.Doc
 import com.jrko.articles.net.GetArticlesClient
-import com.jrko.articles.net.NetworkConnectionLiveData
 import com.jrko.articles.net.RetrofitInstance
 import com.jrko.articles.repository.ArticlesRepository
 import com.jrko.articles.viewmodel.ArticlesListViewModel
