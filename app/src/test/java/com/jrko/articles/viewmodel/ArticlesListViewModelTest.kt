@@ -1,5 +1,6 @@
 package com.jrko.articles.viewmodel
 
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.LiveData
 import com.jrko.articles.model.ArticleResponse
@@ -28,7 +29,8 @@ class ArticlesListViewModelTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        articlesListViewModel = ArticlesListViewModel(articlesRepository)
+        val mockContext =  mock(Context::class.java)
+        articlesListViewModel = ArticlesListViewModel(articlesRepository, mockContext)
     }
 
     @Test
@@ -53,11 +55,18 @@ class ArticlesListViewModelTest {
             assert(it.status == ResourceStatus.IDLE)
         }
 
-        articlesListViewModel.requestList()
+
+        // test loading more pages based on same inquiry
+        articlesListViewModel.getArticles("word")
         liveData.observeOnce {
             assert(it.status == ResourceStatus.LOADING)
         }
 
+        // test clearing doesn't fire off more requests
+        articlesListViewModel.clearSearchQuery()
+        liveData.observeOnce {
+            assert(it.status == ResourceStatus.IDLE)
+        }
     }
 
     @Test

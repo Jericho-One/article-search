@@ -1,5 +1,6 @@
 package com.jrko.articles.adapter
 
+import android.content.Context
 import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.jrko.articles.model.*
@@ -8,7 +9,7 @@ import com.jrko.articles.viewmodel.ArticlesListViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 class ArticlesListAdapterTest {
@@ -19,12 +20,12 @@ class ArticlesListAdapterTest {
     private lateinit var adapter: ArticlesListAdapter
     private lateinit var articlesListViewModel: ArticlesListViewModel
 
-    private val articlesRepository: ArticlesRepository = Mockito.mock(ArticlesRepository::class.java)
+    private val articlesRepository: ArticlesRepository = mock(ArticlesRepository::class.java)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        articlesListViewModel = ArticlesListViewModel(articlesRepository)
+        articlesListViewModel = ArticlesListViewModel(articlesRepository, mock(Context::class.java))
         adapter = ArticlesListAdapter(articlesListViewModel, object : RecyclerViewListener{
             override fun onClick(view: View?, position: Int) {
                 //Do nothing for test
