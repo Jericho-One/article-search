@@ -18,7 +18,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:constraint_referenced_ids="empty_state_view, empty_state_text"/>
+            app:constraint_referenced_ids="empty_state_view,empty_state_text"/>
 
     <ImageView android:layout_width="64dp"
                android:layout_height="64dp"
@@ -35,6 +35,7 @@
               android:layout_height="wrap_content"
               android:id="@+id/empty_state_text"
               android:text="@string/empty_state_text"
+            android:textAlignment="center"
               app:layout_constraintTop_toBottomOf="@+id/empty_state_view"
               app:layout_constraintStart_toStartOf="parent"
               app:layout_constraintEnd_toEndOf="parent"/>
@@ -52,6 +53,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/list_recycler_view"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

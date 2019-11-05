@@ -37,6 +37,7 @@ class ArticlesListViewModel(private val repository: ArticlesRepository, applicat
         if (searchQuery != null) {
             networkJob?.cancel()
             articlesLiveData.value = Resource(ResourceStatus.LOADING, articlesResponse, null)
+            //TODO this should live at the repository level instead of in the view model
             networkJob = CoroutineScope(Dispatchers.IO).async {
                 val response = repository.getArticles(currentSearchQuery, pageCount)
                 withContext(Dispatchers.Main) {

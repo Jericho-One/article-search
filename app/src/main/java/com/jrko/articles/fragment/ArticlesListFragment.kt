@@ -39,7 +39,7 @@ class ArticlesListFragment(/*use dagger for this*/viewModel: ArticlesListViewMod
         articlesListAdapter = ArticlesListAdapter(viewModel, listClickListener)
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         callback = activity as Callback
     }
@@ -54,9 +54,9 @@ class ArticlesListFragment(/*use dagger for this*/viewModel: ArticlesListViewMod
         swipeRefreshLayout = result.findViewById(R.id.swipe_refresh)
         swipeRefreshLayout.setOnRefreshListener { refreshListWithCurrentSearchQuery() }
         recyclerView = result.findViewById(R.id.list_recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(inflater.context).apply {
-            this.orientation = RecyclerView.VERTICAL
-        }
+        //if the items in the adapter don't change the size of the recycler view, optimize
+        //rendering by setting fixed size to true
+        recyclerView.setHasFixedSize(true)
         recyclerView.adapter = articlesListAdapter
         return result
     }
