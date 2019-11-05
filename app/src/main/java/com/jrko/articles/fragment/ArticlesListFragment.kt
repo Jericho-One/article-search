@@ -22,7 +22,12 @@ import com.jrko.articles.net.ResourceStatus
 import com.jrko.articles.viewmodel.ArticlesListViewModel
 
 
-class ArticlesListFragment(/*use dagger for this*/viewModel: ArticlesListViewModel) : Fragment() {
+class ArticlesListFragment(/*use dagger for this*/viewModel: ArticlesListViewModel) : Fragment(),
+    ArticlesListAdapter.ArticleListCallback {
+    override fun onLoadMore() {
+        articlesListViewModel.requestList()
+    }
+
     private var articlesListAdapter: ArticlesListAdapter
     private var articlesListViewModel = viewModel
     private lateinit var recyclerView: RecyclerView
@@ -36,7 +41,7 @@ class ArticlesListFragment(/*use dagger for this*/viewModel: ArticlesListViewMod
                 callback.openArticle(articlesListViewModel.getArticle(position))
             }
         }
-        articlesListAdapter = ArticlesListAdapter(viewModel, listClickListener)
+        articlesListAdapter = ArticlesListAdapter(this, listClickListener)
     }
 
     override fun onAttach(context: Context) {

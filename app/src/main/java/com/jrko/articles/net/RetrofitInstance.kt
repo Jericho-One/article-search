@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit
 
 class RetrofitInstance {
     private var retrofit: Retrofit? = null
-    //TODO this should probably live somewhere safer, maybe the local.properties??
-    private val apiKey = "d31fe793adf546658bd67e2b6a7fd11a"
+    //TODO this should probably live somewhere else, maybe the local.properties??
+    private val apiKey = "yDWyvWhvHV1WG70In3tAfqY7SkjL7JOS"
 
     fun getRetrofitInstance(): Retrofit? {
         val authInterceptor = Interceptor { chain ->

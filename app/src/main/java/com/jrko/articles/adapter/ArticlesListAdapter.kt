@@ -12,17 +12,15 @@ import com.jrko.articles.R
 import com.jrko.articles.model.ArticleResponse
 import com.jrko.articles.model.Doc
 import com.jrko.articles.model.util.ArticleUtil.getHeadlineText
-import com.jrko.articles.viewmodel.ArticlesListViewModel
 import com.squareup.picasso.Picasso
 
-class ArticlesListAdapter(/*not sure if this is a good pattern,
-                            but useful for quick events*/
-                            private val viewModel: ArticlesListViewModel,
+class ArticlesListAdapter(private val callback: ArticleListCallback,
                             private val recyclerViewListener: RecyclerViewListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var data: ArticleResponse? = null
 
+    var data: ArticleResponse? = null
     private var lastDisplayedPosition = -1
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == VIEW_TYPE_NORMAL) {
             ArticleViewHolder(
@@ -71,7 +69,7 @@ class ArticlesListAdapter(/*not sure if this is a good pattern,
             }
             setAnimation(holder.parentView, holder.adapterPosition)
         } else {
-            viewModel.requestList()
+            callback.onLoadMore()
             (holder as LoadingViewHolder).progressBar.visibility = View.VISIBLE
         }
     }
@@ -129,6 +127,10 @@ class ArticlesListAdapter(/*not sure if this is a good pattern,
 
     inner class LoadingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var progressBar: ProgressBar = itemView.findViewById(R.id.progressBar)
+    }
+
+    interface ArticleListCallback{
+        fun onLoadMore()
     }
 
     companion object {

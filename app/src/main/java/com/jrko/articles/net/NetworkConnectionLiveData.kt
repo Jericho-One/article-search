@@ -11,7 +11,7 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 
 /**
- * A LiveData object that Activities or Fragments or ViewModels can observe to monitor
+ * A LiveData object that ViewModels can observe to monitor
  * network change events.
  */
 class NetworkConnectionLiveData(private val context: Context) : LiveData<Boolean>() {
